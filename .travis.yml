@@ -1,10 +1,25 @@
+
+sudo: required
 language: java
-install: mvn -f build-pom.xml install clean --fail-never --quiet -DskipTests=true -Dinvoker.skip=true
-script: mvn -f build-pom.xml verify
 
-notifications:
-  email: cgruber@google.com
+jdk:
+  - oraclejdk8
 
-branches:
-  except:
-    - gh-pages
+script:
+  - mvn clean cobertura:cobertura -Dtest=TypeSimplifierTest#testTypeSimplifierErrorTypes -DfailIfNoTests=false
+
+before_deploy:
+- tar -zcvf coverage-result.tar.gz /home/travis/build/leusonmario/auto/target/site/cobertura
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "IS7Ju6MyQGCATeG5D741qjLGB5uYkEYmP5dzkasDlN8e3qnL3HuOaC2rDa2ai62QqaohggYmol2xx4rpEDMPsZ+rERlNftj6ZqzIXqu/HVZjOIGX3LW4EffunLWY8coKdKKv87sbAq70s2uDae5daeWsK/ALOdAmISfzq8VRrobBggdyhjRF7Vef1eJ2WGz/LK+VmV8URBBfK3EjWojnEzvD/LpGA2w3fs1Actz0w+UyxLo16TcZ5172w9TlXp6zx1Mw3l9zWe5rUXIyMPsPrBA9gjkOKdGjgHl/Pv3x2L9QvbHh9c2qWNNf0K00I6Q3KBA++dEXS8hcsdH5vlP/XM7wSLel3ZV2obJPmbUpu8HFCNf+UeiNSQk6XqGW9qHbpPaUgwud1SZpJaP3XNqertjsUKaDGudj2PvvfZwGi/RS8QOkmtrxAIkiVJcVqWAilwTKGy6aQHzOS61iY3RjLuc0qqH9Syv/Y00S1qLmTwWN5W5fV9Pl1WRNmk8NeLOi9q3KAibSQg2V6xFHqP6UjlLN7DtPwEYCtN3gLkgxqBlgxooVTaHVufrz4ROOqCs3QBUvlZdsJc4mMtYmNtzAOKlV1ehC/G3zCF7yDhLGgcv2wa9cLjUd/CFpEqIK9DVKL49Fk4pTCcx7UTGHSEeoiiog1yPnN6XXAEBJUj8WKBI="
+
+
+  file: coverage-result.tar.gz
+  file_glob: true
+  overwrite: true
+  skip_cleanup: true
+  on:
+    tags: true
